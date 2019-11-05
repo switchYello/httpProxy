@@ -5,7 +5,7 @@ import io.netty.util.concurrent.FutureListener;
 
 /**
  * @author xiaoming
- * 只有监听器成功才执行
+ * 只有监听器成功才执行的监听器
  */
 public abstract class SuccessFutureListener<V> implements FutureListener<V> {
 

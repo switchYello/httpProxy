@@ -12,11 +12,11 @@ import java.util.Map;
 
 /**
  * 验证http代理的帐号密码
+ * 提供两种方式
  */
 public class PasswordChecker {
 
     private static Logger log = LoggerFactory.getLogger(PasswordChecker.class);
-
 
     private static String proxyHead = "Proxy-Authorization";
     private static String username = PropertiesUtil.getStrProp("username");

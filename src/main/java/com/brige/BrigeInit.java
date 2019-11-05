@@ -1,8 +1,8 @@
 package com.brige;
 
-import com.start.HeartBeatHandler;
+import com.handlers.ExceptionHandler;
 import com.start.HttpService;
-import com.start.LoginHandler;
+import com.handlers.LoginHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -29,6 +29,6 @@ public class BrigeInit extends ChannelInitializer<Channel> {
         //真实处理类
         p.addLast("httpservice", httpService);
         //处理超时事件
-        p.addLast("heartbeat", HeartBeatHandler.INSTANSE);
+        p.addLast("heartbeat", ExceptionHandler.INSTANSE);
     }
 }
