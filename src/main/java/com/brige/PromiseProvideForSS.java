@@ -52,7 +52,7 @@ public class PromiseProvideForSS implements PromiseProvide {
                             Channel webChannel = channelFuture.channel();//连接服务器的channel
                             Channel clientChannel = ctx.channel();
                             bindClose(webChannel, clientChannel);
-
+                            clientChannel.pipeline().addLast(new TransferHandler(webChannel));
                             String host = address.getHostName();
                             int port = address.getPort();
                             ByteBuf buffer = Unpooled.buffer(4 + host.length());
