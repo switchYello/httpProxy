@@ -1,5 +1,6 @@
 package com.utils;
 
+import com.start.Context;
 import io.netty.handler.codec.http.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -19,8 +20,8 @@ public class PasswordChecker {
     private static Logger log = LoggerFactory.getLogger(PasswordChecker.class);
 
     private static String proxyHead = "Proxy-Authorization";
-    private static String username = PropertiesUtil.getStrProp("username");
-    private static String password = PropertiesUtil.getStrProp("password");
+    private static String realUserName = Context.getEnvironment().getUserName();
+    private static String realPassword = Context.getEnvironment().getPassWord();
 
     //digest方式验证密码
     public static boolean digestLogin(HttpRequest req) {
@@ -41,7 +42,7 @@ public class PasswordChecker {
                 log.debug("Proxy-Authorization等号头分割:{},size:{}", Arrays.toString(kv), kv.length);
                 map.put(kv[0].trim(), kv[1].trim().replaceAll("\"", ""));
             }
-            return PasswordChecker.degestCheck(map, req.method().toString());
+            return degestCheck(map, req.method().toString());
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -60,7 +61,7 @@ public class PasswordChecker {
             byte[] decode = Base64.decodeBase64(split[1]);
             String userNamePassWord = new String(decode);
             String[] split1 = userNamePassWord.split(":", 2);
-            return PasswordChecker.basicCheck(split1[0], split1[1]);
+            return basicCheck(split1[0], split1[1]);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -85,12 +86,12 @@ public class PasswordChecker {
 
     //使用basic的方式判断账号密码对不对
     private static boolean basicCheck(String userName, String passWord) {
-        return username.equals(userName) && password.equals(passWord);
+        return realUserName.equals(userName) && realPassword.equals(passWord);
     }
 
     //使用degest的方式验证密码
     private static boolean degestCheck(Map<String, String> map, String method) {
-        String h1 = username + ":" + map.get("realm") + ":" + password;
+        String h1 = realUserName + ":" + map.get("realm") + ":" + realPassword;
         String h2 = method + ":" + map.get("uri");
         String s = md5(md5(h1) + ":" + map.get("nonce") + ":" + map.get("nc") + ":" + map.get("cnonce") + ":auth:" + md5(h2));
         return s.equals(map.get("response"));

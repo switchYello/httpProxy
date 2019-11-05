@@ -60,7 +60,6 @@ public class Environment {
         String localPort = properties.getProperty("localPort");
         if (localPort != null) {
             this.localPort = Integer.valueOf(localPort);
-            log.info("localPort:{}", this.localPort);
         }
         try {
             String proxyType = properties.getProperty("proxyType");

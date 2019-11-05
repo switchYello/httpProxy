@@ -16,6 +16,6 @@ public abstract class SuccessFutureListener<V> implements FutureListener<V> {
         }
     }
 
-    abstract void operationComplete0(V future) throws Exception;
+    public abstract void operationComplete0(V future) throws Exception;
 
 }

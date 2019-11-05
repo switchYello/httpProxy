@@ -1,6 +1,7 @@
-package com.start;
+package com.handlers;
 
-import com.handlers.TransferHandler;
+import com.start.PromiseProvide;
+import com.start.SuccessFutureListener;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
@@ -34,12 +35,12 @@ public class HttpService extends ChannelInboundHandlerAdapter {
             //https连接完成后，开始通传，删除http相关的handler
             promise.addListener(new SuccessFutureListener<Channel>() {
                 @Override
-                void operationComplete0(Channel value) {
+                public void operationComplete0(Channel value) {
                     p.addLast(new TransferHandler(value));
                     FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(200, "OK"));
                     ctx.writeAndFlush(resp).addListener(new SuccessFutureListener<Void>() {
                         @Override
-                        void operationComplete0(Void future) {
+                        public void operationComplete0(Void future) {
                             removeHttpHandler(p);
                         }
                     });
@@ -50,13 +51,13 @@ public class HttpService extends ChannelInboundHandlerAdapter {
             //http代理，代理后需要将原始报文继续发出去
             promise.addListener(new SuccessFutureListener<Channel>() {
                 @Override
-                void operationComplete0(final Channel value) {
+                public void operationComplete0(final Channel value) {
                     removeHttpHandler(p);
                     p.addLast(new TransferHandler(value));
                     value.pipeline().addLast(new HttpRequestEncoder());
                     value.writeAndFlush(req).addListener(new SuccessFutureListener<Void>() {
                         @Override
-                        void operationComplete0(Void future) {
+                        public void operationComplete0(Void future) {
                             value.pipeline().remove(HttpRequestEncoder.class);
                         }
                     });

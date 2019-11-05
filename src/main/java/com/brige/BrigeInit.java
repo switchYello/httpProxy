@@ -1,7 +1,7 @@
 package com.brige;
 
 import com.handlers.ExceptionHandler;
-import com.start.HttpService;
+import com.handlers.HttpService;
 import com.handlers.LoginHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;

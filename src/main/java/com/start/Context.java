@@ -40,12 +40,19 @@ public class Context {
         return contextHolder;
     }
 
+    public static Environment getEnvironment() {
+        if (!init) {
+            throw new RuntimeException("not find contxt");
+        }
+        return contextHolder.environment;
+    }
+
+
     public void start() {
         start(1);
     }
 
     public void start(int threadCount) {
-        log.info("start thread count:{}", threadCount);
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workGroup = new NioEventLoopGroup(threadCount);
         try {
@@ -56,6 +63,7 @@ public class Context {
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                     .childHandler(getInitializer());
+            log.info("start at:{}", environment.getLocalPort());
             ChannelFuture f = b.bind(environment.getLocalPort()).sync();
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {
