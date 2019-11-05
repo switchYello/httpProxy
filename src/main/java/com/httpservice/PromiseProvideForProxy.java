@@ -32,15 +32,11 @@ public class PromiseProvideForProxy implements PromiseProvide {
                     @Override
                     public void operationComplete(ChannelFuture channelFuture) {
                         //这里将连接服务器的channel和连接client的channel进行绑定，如果一个断开另一个也断开
+                        bindClose(channelFuture.channel(), ctx.channel());
                         if (channelFuture.isSuccess()) {
-                            Channel webChannel = channelFuture.channel();
-                            Channel clientChannel = ctx.channel();
-                            bindClose(webChannel, clientChannel);
-                            ctx.pipeline().addLast(new TransferHandler(webChannel));
-                            promise.setSuccess(webChannel);
+                            promise.setSuccess(channelFuture.channel());
                         } else {
                             ctx.close();
-                            channelFuture.cancel(true);
                         }
                     }
                 });

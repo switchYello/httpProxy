@@ -2,9 +2,12 @@ package com.handlers;
 
 import com.start.PromiseProvide;
 import com.start.SuccessFutureListener;
+import com.utils.ChannelUtil;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 
 import java.net.InetSocketAddress;
@@ -32,7 +35,9 @@ public class HttpService extends ChannelInboundHandlerAdapter {
         final FullHttpRequest req = (FullHttpRequest) msg;
         final ChannelPipeline p = ctx.pipeline();
         InetSocketAddress inetSocketAddress = resolveHostPort(req.headers().get("Host"));
+        //创建远程连接，等待连接完成
         Promise<Channel> promise = promiseProvide.createPromise(inetSocketAddress, ctx);
+
         //https代理
         if (HttpMethod.CONNECT.equals(req.method())) {
             ReferenceCountUtil.release(msg);
@@ -40,6 +45,7 @@ public class HttpService extends ChannelInboundHandlerAdapter {
             promise.addListener(new SuccessFutureListener<Channel>() {
                 @Override
                 public void operationComplete0(Channel value) {
+                    ctx.pipeline().addLast(new TransferHandler(value));
                     FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(200, "OK"));
                     ctx.writeAndFlush(resp).addListener(new SuccessFutureListener<Void>() {
                         @Override
@@ -52,9 +58,11 @@ public class HttpService extends ChannelInboundHandlerAdapter {
         } else {
             req.headers().remove("Proxy-Authorization").remove("Proxy-Connection").add("Connection", "keep-alive");
             //http代理，代理后需要将原始报文继续发出去
+            //这里调用channel的write方法，会从tail向head查找outHandler
             promise.addListener(new SuccessFutureListener<Channel>() {
                 @Override
                 public void operationComplete0(final Channel value) {
+                    ctx.pipeline().addLast(new TransferHandler(value));
                     removeHttpHandler(p);
                     value.pipeline().addLast(new HttpRequestEncoder());
                     value.writeAndFlush(req).addListener(new SuccessFutureListener<Void>() {
@@ -85,6 +93,5 @@ public class HttpService extends ChannelInboundHandlerAdapter {
         p.remove("objectAggregator");
         p.remove("httpservice");
     }
-
 
 }

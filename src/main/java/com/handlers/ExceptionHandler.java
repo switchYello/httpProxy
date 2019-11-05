@@ -19,6 +19,10 @@ public class ExceptionHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger log = LoggerFactory.getLogger(ExceptionHandler.class);
 
+    private ExceptionHandler() {
+
+    }
+
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {

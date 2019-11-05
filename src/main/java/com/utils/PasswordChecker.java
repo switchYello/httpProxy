@@ -23,7 +23,7 @@ public class PasswordChecker {
     private static String realUserName = Context.getEnvironment().getUserName();
     private static String realPassword = Context.getEnvironment().getPassWord();
 
-    //digest方式验证密码
+    //digest方式登录
     public static boolean digestLogin(HttpRequest req) {
         String s = req.headers().get(proxyHead);
         if (s == null) {
