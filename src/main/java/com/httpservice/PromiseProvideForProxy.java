@@ -1,7 +1,7 @@
 package com.httpservice;
 
-import com.start.PromiseProvide;
 import com.handlers.TransferHandler;
+import com.start.PromiseProvide;
 import com.utils.ChannelUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -15,13 +15,16 @@ import java.net.InetSocketAddress;
  */
 public class PromiseProvideForProxy implements PromiseProvide {
 
+    private static Bootstrap b = new Bootstrap();
+
+    static {
+        b.channel(NioSocketChannel.class).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000);
+    }
+
     @Override
     public Promise<Channel> createPromise(InetSocketAddress addr, final ChannelHandlerContext ctx) {
         final Promise<Channel> promise = ctx.executor().newPromise();
-        Bootstrap b = new Bootstrap();
-        b.group(ctx.channel().eventLoop())
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+        b.clone(ctx.channel().eventLoop())
                 .remoteAddress(addr)
                 .handler(new TransferHandler(ctx.channel()))
                 .connect()
@@ -30,20 +33,10 @@ public class PromiseProvideForProxy implements PromiseProvide {
                     public void operationComplete(ChannelFuture channelFuture) {
                         //这里将连接服务器的channel和连接client的channel进行绑定，如果一个断开另一个也断开
                         if (channelFuture.isSuccess()) {
-                            final Channel webChannel = channelFuture.channel();
-                            final Channel clientChannel = ctx.channel();
-                            webChannel.closeFuture().addListener(new ChannelFutureListener() {
-                                @Override
-                                public void operationComplete(ChannelFuture future) {
-                                    ChannelUtil.closeOnFlush(clientChannel);
-                                }
-                            });
-                            clientChannel.closeFuture().addListener(new ChannelFutureListener() {
-                                @Override
-                                public void operationComplete(ChannelFuture future) {
-                                    ChannelUtil.closeOnFlush(webChannel);
-                                }
-                            });
+                            Channel webChannel = channelFuture.channel();
+                            Channel clientChannel = ctx.channel();
+                            bindClose(webChannel, clientChannel);
+                            ctx.pipeline().addLast(new TransferHandler(webChannel));
                             promise.setSuccess(webChannel);
                         } else {
                             ctx.close();
@@ -53,4 +46,20 @@ public class PromiseProvideForProxy implements PromiseProvide {
                 });
         return promise;
     }
+
+    private void bindClose(final Channel c1, final Channel c2) {
+        c1.closeFuture().addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) {
+                ChannelUtil.closeOnFlush(c2);
+            }
+        });
+        c2.closeFuture().addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) {
+                ChannelUtil.closeOnFlush(c1);
+            }
+        });
+    }
+
 }

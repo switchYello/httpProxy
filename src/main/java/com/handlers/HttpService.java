@@ -9,6 +9,10 @@ import io.netty.util.concurrent.Promise;
 
 import java.net.InetSocketAddress;
 
+/**
+ * 处理http(s)代理请求
+ * 解析请求ip 端口
+ */
 @ChannelHandler.Sharable
 public class HttpService extends ChannelInboundHandlerAdapter {
 
@@ -36,7 +40,6 @@ public class HttpService extends ChannelInboundHandlerAdapter {
             promise.addListener(new SuccessFutureListener<Channel>() {
                 @Override
                 public void operationComplete0(Channel value) {
-                    p.addLast(new TransferHandler(value));
                     FullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(200, "OK"));
                     ctx.writeAndFlush(resp).addListener(new SuccessFutureListener<Void>() {
                         @Override
@@ -53,7 +56,6 @@ public class HttpService extends ChannelInboundHandlerAdapter {
                 @Override
                 public void operationComplete0(final Channel value) {
                     removeHttpHandler(p);
-                    p.addLast(new TransferHandler(value));
                     value.pipeline().addLast(new HttpRequestEncoder());
                     value.writeAndFlush(req).addListener(new SuccessFutureListener<Void>() {
                         @Override
