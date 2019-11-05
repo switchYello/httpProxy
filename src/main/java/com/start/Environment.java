@@ -1,5 +1,6 @@
 package com.start;
 
+import com.utils.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +36,7 @@ public class Environment {
     }
 
     public Environment(String fileName) {
-        ClassLoader classLoader = Environment.class.getClassLoader();
-        ClassLoader load = classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
-        Objects.requireNonNull(load, "无法获取classLoad");
-        try (InputStream resourceAsStream = load.getResourceAsStream(fileName)) {
+        try (InputStream resourceAsStream = ResourceManager.gerResourceForFile(fileName)) {
             Objects.requireNonNull(resourceAsStream, "未发现配置文件:" + fileName);
             Properties properties = new Properties();
             properties.load(resourceAsStream);
