@@ -1,10 +1,10 @@
 package com.brige;
 
 import com.handlers.TransferHandler;
+import com.start.Context;
 import com.start.PromiseProvide;
 import com.utils.ChannelUtil;
 import com.utils.ContextSSLFactory;
-import com.utils.PropertiesUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -20,6 +20,8 @@ import java.net.InetSocketAddress;
 public class PromiseProvideForSS implements PromiseProvide {
 
     private static final SslContext context;
+    private String remoteHost = Context.getEnvironment().getRemoteHost();
+    private int remotePort = Context.getEnvironment().getRemotePort();
 
     static {
         context = ContextSSLFactory.getSslContextClient();
@@ -31,7 +33,7 @@ public class PromiseProvideForSS implements PromiseProvide {
         Bootstrap b = new Bootstrap();
         b.group(ctx.channel().eventLoop())
                 .channel(NioSocketChannel.class)
-                .remoteAddress(PropertiesUtil.getStrProp("service.host"), PropertiesUtil.getIntProp("service.port"))
+                .remoteAddress(remoteHost, remotePort)
                 .handler(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel channel) {
