@@ -39,7 +39,7 @@ public class PromiseProvideForSS implements PromiseProvide {
                     protected void initChannel(Channel channel) {
                         ChannelPipeline p = channel.pipeline();
                         p.addLast(new SslHandler(CONTEXT.newEngine(channel.alloc())));
-                        p.addLast(new EnSuccessReplay(promise));
+                        p.addLast(new EnSuccessHandler(promise));
                         p.addLast(new TransferHandler(ctx.channel()));
                     }
                 })
@@ -52,7 +52,7 @@ public class PromiseProvideForSS implements PromiseProvide {
                             Channel webChannel = channelFuture.channel();//连接服务器的channel
                             Channel clientChannel = ctx.channel();
                             bindClose(webChannel, clientChannel);
-                            clientChannel.pipeline().addLast(new TransferHandler(webChannel));
+                            ctx.pipeline().addLast(new TransferHandler(webChannel));
                             String host = address.getHostName();
                             int port = address.getPort();
                             ByteBuf buffer = Unpooled.buffer(4 + host.length());

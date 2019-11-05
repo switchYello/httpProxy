@@ -62,7 +62,6 @@ public class Environment {
         try {
             String proxyType = properties.getProperty("proxyType");
             this.proxyType = Enum.valueOf(ProxyType.class, proxyType);
-            log.info("proxyType:{}", this.proxyType);
         } catch (Exception ignored) {
 
         }
