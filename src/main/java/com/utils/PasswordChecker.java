@@ -7,7 +7,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,18 +19,21 @@ public class PasswordChecker {
     private static Logger log = LoggerFactory.getLogger(PasswordChecker.class);
 
     private static String proxyHead = "Proxy-Authorization";
+    private static String hostHead = "Host";
+
     private static String realUserName = Context.getEnvironment().getUserName();
     private static String realPassword = Context.getEnvironment().getPassWord();
 
     //digest方式登录
     public static boolean digestLogin(HttpRequest req) {
         String s = req.headers().get(proxyHead);
+        String host = req.headers().get(hostHead);
         if (s == null) {
             return false;
         }
         try {
             // Digest username="1", realm="Text", nonce="1543832167934", uri="/", response="401aaf0fe5388b02bd2a410b6f87ecd8", opaque="password", qop=auth, nc=00000001, cnonce="7bb142d0282b2405"
-            log.debug("原始Proxy-Authorization头:{}", s);
+            log.debug("域名:{},认证头:{}", host, s);
             //移除‘Digest ’
             s = s.substring(7);
             //这里用逗号划分，uri中可能包含逗号从而出错
@@ -39,7 +41,6 @@ public class PasswordChecker {
             Map<String, String> map = new HashMap<>(16);
             for (String param : params) {
                 String[] kv = param.split("=", 2);
-                log.debug("Proxy-Authorization等号头分割:{},size:{}", Arrays.toString(kv), kv.length);
                 map.put(kv[0].trim(), kv[1].trim().replaceAll("\"", ""));
             }
             return degestCheck(map, req.method().toString());

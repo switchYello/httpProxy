@@ -6,6 +6,8 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
@@ -16,6 +18,7 @@ import java.net.InetSocketAddress;
 @ChannelHandler.Sharable
 public class HttpService extends ChannelInboundHandlerAdapter {
 
+    private static Logger log = LoggerFactory.getLogger(HttpService.class);
     private PromiseProvide promiseProvide;
 
     public HttpService(PromiseProvide promiseProvide) {
@@ -32,9 +35,8 @@ public class HttpService extends ChannelInboundHandlerAdapter {
         final FullHttpRequest req = (FullHttpRequest) msg;
         final ChannelPipeline p = ctx.pipeline();
         InetSocketAddress inetSocketAddress = resolveHostPort(req.headers().get("Host"));
-        //创建远程连接，等待连接完成
+        //创建远程连接，等待连接完成,,下面添加的回掉只有连接成功才会触发
         Promise<Channel> promise = promiseProvide.createPromise(inetSocketAddress, ctx);
-
         //https代理
         if (HttpMethod.CONNECT.equals(req.method())) {
             ReferenceCountUtil.release(msg);

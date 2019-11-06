@@ -1,11 +1,10 @@
 package com.httpservice;
 
+import com.handlers.ExceptionHandler;
 import com.handlers.TransferHandler;
+import com.start.Context;
 import com.start.PromiseProvide;
-import com.utils.ChannelUtil;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Promise;
 
 import java.net.InetSocketAddress;
@@ -15,18 +14,20 @@ import java.net.InetSocketAddress;
  */
 public class PromiseProvideForProxy implements PromiseProvide {
 
-    private static Bootstrap b = new Bootstrap();
-
-    static {
-        b.channel(NioSocketChannel.class).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000);
-    }
+    private Context context = Context.getNow();
 
     @Override
     public Promise<Channel> createPromise(InetSocketAddress addr, final ChannelHandlerContext ctx) {
         final Promise<Channel> promise = ctx.executor().newPromise();
-        b.clone(ctx.channel().eventLoop())
+        context.createBootStrap(ctx.channel().eventLoop())
                 .remoteAddress(addr)
-                .handler(new TransferHandler(ctx.channel()))
+                .handler(new ChannelInitializer<Channel>() {
+                    @Override
+                    protected void initChannel(Channel ch) {
+                        ch.pipeline().addLast(new TransferHandler(ctx.channel()));
+                        ch.pipeline().addLast(ExceptionHandler.INSTANSE);
+                    }
+                })
                 .connect()
                 .addListener(new ChannelFutureListener() {
                     @Override
@@ -34,7 +35,10 @@ public class PromiseProvideForProxy implements PromiseProvide {
                         if (channelFuture.isSuccess()) {
                             promise.setSuccess(channelFuture.channel());
                         } else {
-                            ChannelUtil.closeOnFlush(ctx.channel());
+                            if (channelFuture.cause() != null) {
+                                throw new RuntimeException(channelFuture.cause());
+                            }
+                            promise.cancel(true);
                             channelFuture.cancel(false);
                         }
                     }

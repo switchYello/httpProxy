@@ -35,7 +35,7 @@ public class ExceptionHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.debug("", cause);
+        log.debug("exceptionHandler", cause);
         ChannelUtil.closeOnFlush(ctx.channel());
     }
 }

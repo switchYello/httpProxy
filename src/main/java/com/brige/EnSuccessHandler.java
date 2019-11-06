@@ -2,7 +2,6 @@ package com.brige;
 
 import com.start.Context;
 import com.start.Environment;
-import com.utils.ChannelUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -23,12 +22,19 @@ import java.util.List;
 public class EnSuccessHandler extends ReplayingDecoder<EnSuccessHandler.LoginStatus> {
 
     private static Logger log = LoggerFactory.getLogger(EnSuccessHandler.class);
+    //连接占位符
     private Promise<Channel> promise;
+    //目标地址
     private InetSocketAddress address;
+    //目标host = address.host
     private String host;
+    //目标port = address.port
     private int port;
+    //环境
     private Environment environment = Context.getEnvironment();
+    //初次提交数据的开始时间
     private long startTime;
+    //解析次数
     private int encoderCount = 0;
 
     //登录状态
@@ -65,7 +71,6 @@ public class EnSuccessHandler extends ReplayingDecoder<EnSuccessHandler.LoginSta
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         startTime = System.currentTimeMillis();
-        log.info("服务器请求:{}", address);
         ByteBuf buffer = Unpooled.buffer(1 + 2 + ByteBufUtil.utf8MaxBytes(host) + 2);
         buffer.writeByte(requestType.link.code);
         buffer.writeShort(host.length() + 2);
@@ -82,8 +87,6 @@ public class EnSuccessHandler extends ReplayingDecoder<EnSuccessHandler.LoginSta
      * 2.需要验证
      * 其他情况.拒绝连接或连接不成功
      */
-
-
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) {
         encoderCount++;
@@ -91,7 +94,7 @@ public class EnSuccessHandler extends ReplayingDecoder<EnSuccessHandler.LoginSta
         if (i == 1) {
             ctx.pipeline().remove(this);
             promise.setSuccess(ctx.channel());
-            log.info("服务器连接成功,域名:{},解码次数:{}，耗时:{}", address, encoderCount, System.currentTimeMillis() - startTime);
+            log.debug("服务器连接成功,目标地址:{},解码次数:{}，耗时:{}", address, encoderCount, System.currentTimeMillis() - startTime);
             return;
         }
         switch (state()) {
@@ -112,13 +115,12 @@ public class EnSuccessHandler extends ReplayingDecoder<EnSuccessHandler.LoginSta
                     ctx.writeAndFlush(b);
                     state(LoginStatus.sendLogin);
                 } else {
-                    ChannelUtil.closeOnFlush(ctx.channel());
+                    throw new RuntimeException("requestLink请求认证阶段，未知返回值:" + i);
                 }
                 break;
             }
             case sendLogin: {
-                ChannelUtil.closeOnFlush(ctx.channel());
-                break;
+                throw new RuntimeException("sendLogin等待认证通过阶段，未知返回值:" + i);
             }
             default:
                 break;
