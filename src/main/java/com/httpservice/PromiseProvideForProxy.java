@@ -31,31 +31,16 @@ public class PromiseProvideForProxy implements PromiseProvide {
                 .addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture channelFuture) {
-                        //这里将连接服务器的channel和连接client的channel进行绑定，如果一个断开另一个也断开
-                        bindClose(channelFuture.channel(), ctx.channel());
                         if (channelFuture.isSuccess()) {
                             promise.setSuccess(channelFuture.channel());
                         } else {
-                            ctx.close();
+                            ChannelUtil.closeOnFlush(ctx.channel());
+                            channelFuture.cancel(false);
                         }
                     }
                 });
         return promise;
     }
 
-    private void bindClose(final Channel c1, final Channel c2) {
-        c1.closeFuture().addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) {
-                ChannelUtil.closeOnFlush(c2);
-            }
-        });
-        c2.closeFuture().addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) {
-                ChannelUtil.closeOnFlush(c1);
-            }
-        });
-    }
 
 }

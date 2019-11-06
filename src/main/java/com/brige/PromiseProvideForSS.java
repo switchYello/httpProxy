@@ -44,9 +44,9 @@ public class PromiseProvideForSS implements PromiseProvide {
                 .addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) {
-                        bindClose(future.channel(), ctx.channel());
                         if (!future.isSuccess()) {
-                            ctx.close();
+                            ChannelUtil.closeOnFlush(ctx.channel());
+                            future.cancel(false);
                         }
                     }
                 });

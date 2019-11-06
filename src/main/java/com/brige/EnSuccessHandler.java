@@ -80,7 +80,7 @@ public class EnSuccessHandler extends ReplayingDecoder<EnSuccessHandler.LoginSta
      * 其他情况.拒绝连接或连接不成功
      */
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) {
         byte i = msg.readByte();
         if (i == 1) {
             ctx.pipeline().remove(this);
