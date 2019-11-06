@@ -2,12 +2,9 @@ package com.handlers;
 
 import com.start.PromiseProvide;
 import com.start.SuccessFutureListener;
-import com.utils.ChannelUtil;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 
 import java.net.InetSocketAddress;

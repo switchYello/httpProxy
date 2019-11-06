@@ -13,7 +13,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import java.util.concurrent.TimeUnit;
 
 public class BrigeInit extends ChannelInitializer<Channel> {
-    private HttpService httpService = new HttpService(new PromiseProvideForSS());
+    private static HttpService httpService = new HttpService(new PromiseProvideForSS());
 
     @Override
     protected void initChannel(Channel channel) {

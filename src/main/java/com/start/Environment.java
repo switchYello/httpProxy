@@ -29,6 +29,7 @@ public class Environment {
     private Integer localPort;
     private String remoteHost;
     private Integer remotePort;
+    private String remoteSalt = "";
 
     public Environment(Properties properties) {
         loadData(properties);
@@ -51,6 +52,7 @@ public class Environment {
         userName = properties.getProperty("userName");
         passWord = properties.getProperty("passWord");
         remoteHost = properties.getProperty("remoteHost");
+        remoteSalt = properties.getProperty("remoteSalt");
         String remotePort = properties.getProperty("remotePort");
         if (remotePort != null) {
             this.remotePort = Integer.valueOf(remotePort);
@@ -131,5 +133,12 @@ public class Environment {
         return this;
     }
 
+    public String getRemoteSalt() {
+        return remoteSalt;
+    }
 
+    public Environment setRemoteSalt(String remoteSalt) {
+        this.remoteSalt = remoteSalt;
+        return this;
+    }
 }

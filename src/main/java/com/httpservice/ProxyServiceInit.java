@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * */
 public class ProxyServiceInit extends ChannelInitializer<Channel> {
 
-    private HttpService httpService = new HttpService(new PromiseProvideForProxy());
+    private static HttpService httpService = new HttpService(new PromiseProvideForProxy());
 
     @Override
     protected void initChannel(Channel channel) {
