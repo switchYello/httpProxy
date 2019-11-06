@@ -29,11 +29,11 @@ public class Context {
     }
 
     public Context() {
-        this(DEFAULT_ENVIRONMENT_PARAM, 5);
+        this(DEFAULT_ENVIRONMENT_PARAM, 1);
     }
 
     public Context(String param) {
-        this(param, 5);
+        this(param, 1);
     }
 
     public Context(int threadCount) {
