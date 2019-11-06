@@ -1,7 +1,6 @@
 package com.handlers;
 
 import com.utils.PasswordChecker;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -34,7 +33,7 @@ public class LoginHandler extends ChannelInboundHandlerAdapter {
             ctx.fireChannelRead(msg);
         } else {
             ReferenceCountUtil.release(msg);
-            ctx.writeAndFlush(PasswordChecker.getDigestNotLoginResponse()).addListener(ChannelFutureListener.CLOSE);
+            ctx.writeAndFlush(PasswordChecker.getDigestNotLoginResponse());
         }
     }
 
