@@ -5,9 +5,7 @@ import com.start.Context;
 import com.start.PromiseProvide;
 import com.utils.ChannelUtil;
 import com.utils.ContextSSLFactory;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Promise;
@@ -16,20 +14,15 @@ import java.net.InetSocketAddress;
 
 public class PromiseProvideForSS implements PromiseProvide {
 
-    private static final SslContext CONTEXT;
+    private static SslContext CONTEXT = ContextSSLFactory.getSslContextClient();
     private String remoteHost = Context.getEnvironment().getRemoteHost();
     private int remotePort = Context.getEnvironment().getRemotePort();
-    private static Bootstrap b = new Bootstrap();
-
-    static {
-        CONTEXT = ContextSSLFactory.getSslContextClient();
-        b.channel(NioSocketChannel.class).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000);
-    }
+    private Context context = Context.getNow();
 
     @Override
     public Promise<Channel> createPromise(final InetSocketAddress address, final ChannelHandlerContext ctx) {
         final Promise<Channel> promise = ctx.executor().newPromise();
-        b.clone(ctx.channel().eventLoop())
+        context.createBootStrap(ctx.channel().eventLoop())
                 .remoteAddress(remoteHost, remotePort)
                 .handler(new ChannelInitializer<Channel>() {
                     @Override

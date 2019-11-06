@@ -1,6 +1,5 @@
 package com.brige;
 
-import ch.qos.logback.classic.pattern.EnsureExceptionHandling;
 import com.start.Context;
 import com.start.Environment;
 import com.utils.ChannelUtil;
@@ -23,12 +22,14 @@ import java.util.List;
 //服务器端返回0，表示连接成功，如果返回的不是0则断开连接
 public class EnSuccessHandler extends ReplayingDecoder<EnSuccessHandler.LoginStatus> {
 
-    private static Logger log = LoggerFactory.getLogger(EnsureExceptionHandling.class);
+    private static Logger log = LoggerFactory.getLogger(EnSuccessHandler.class);
     private Promise<Channel> promise;
     private InetSocketAddress address;
     private String host;
     private int port;
     private Environment environment = Context.getEnvironment();
+    private long startTime;
+    private int encoderCount = 0;
 
     //登录状态
     enum LoginStatus {
@@ -63,14 +64,16 @@ public class EnSuccessHandler extends ReplayingDecoder<EnSuccessHandler.LoginSta
     //
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        startTime = System.currentTimeMillis();
+        log.info("服务器请求:{}", address);
         ByteBuf buffer = Unpooled.buffer(1 + 2 + ByteBufUtil.utf8MaxBytes(host) + 2);
         buffer.writeByte(requestType.link.code);
         buffer.writeShort(host.length() + 2);
         buffer.writeCharSequence(host, StandardCharsets.UTF_8);
         buffer.writeShort(port);
         ctx.writeAndFlush(buffer).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-        super.channelActive(ctx);
         state(LoginStatus.requestLink);
+        super.channelActive(ctx);
     }
 
 
@@ -79,13 +82,16 @@ public class EnSuccessHandler extends ReplayingDecoder<EnSuccessHandler.LoginSta
      * 2.需要验证
      * 其他情况.拒绝连接或连接不成功
      */
+
+
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) {
+        encoderCount++;
         byte i = msg.readByte();
         if (i == 1) {
             ctx.pipeline().remove(this);
             promise.setSuccess(ctx.channel());
-            log.debug("服务器返回1，连接成功");
+            log.info("服务器连接成功,域名:{},解码次数:{}，耗时:{}", address, encoderCount, System.currentTimeMillis() - startTime);
             return;
         }
         switch (state()) {
