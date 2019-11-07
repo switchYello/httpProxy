@@ -24,8 +24,8 @@ public class PromiseProvideForProxy implements PromiseProvide {
                 .handler(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel ch) {
-                        ch.pipeline().addLast(ExceptionHandler.INSTANSE);
                         ch.pipeline().addLast(new TransferHandler(ctx.channel()));
+                        ch.pipeline().addLast(ExceptionHandler.INSTANSE);
                     }
                 })
                 .connect()
@@ -35,11 +35,7 @@ public class PromiseProvideForProxy implements PromiseProvide {
                         if (channelFuture.isSuccess()) {
                             promise.setSuccess(channelFuture.channel());
                         } else {
-                            if (channelFuture.cause() != null) {
-                                throw new RuntimeException(channelFuture.cause());
-                            }
-                            promise.cancel(true);
-                            channelFuture.cancel(false);
+                            ctx.fireExceptionCaught(channelFuture.cause());
                         }
                     }
                 });

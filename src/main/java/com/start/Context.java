@@ -1,6 +1,7 @@
 package com.start;
 
 import com.brige.BrigeInit;
+import com.dns.AsnycDns;
 import com.httpservice.ProxyServiceInit;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
@@ -25,7 +26,7 @@ public class Context {
     private static Bootstrap b = new Bootstrap();
 
     static {
-        b.channel(NioSocketChannel.class).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000);
+        b.channel(NioSocketChannel.class).resolver(AsnycDns.INSTANCE).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000);
     }
 
     public Context() {

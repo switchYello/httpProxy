@@ -32,10 +32,10 @@ public class PromiseProvideForSS implements PromiseProvide {
                     @Override
                     protected void initChannel(Channel channel) {
                         ChannelPipeline p = channel.pipeline();
-                        p.addLast(ExceptionHandler.INSTANSE);
                         p.addLast(new SslHandler(CONTEXT.newEngine(channel.alloc())));
                         p.addLast(new EnSuccessHandler(promise, address));
                         p.addLast(new TransferHandler(ctx.channel()));
+                        p.addLast(ExceptionHandler.INSTANSE);
                     }
                 })
                 .connect()
@@ -48,15 +48,10 @@ public class PromiseProvideForSS implements PromiseProvide {
                         if (future.isSuccess()) {
                             //连接成功了
                         } else {
-                            promise.cancel(true);
-                            future.cancel(false);
-                            if (future.cause() != null) {
-                                throw new RuntimeException(future.cause());
-                            }
+                            ctx.fireExceptionCaught(future.cause());
                         }
                     }
                 });
-
         return promise;
     }
 }
