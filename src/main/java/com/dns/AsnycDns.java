@@ -17,7 +17,7 @@ public class AsnycDns extends AddressResolverGroup {
 
     @Override
     protected AddressResolver newResolver(EventExecutor executor) {
-
+        assertTrue(EventLoop.class.isAssignableFrom(executor.getClass()), "异步dns EventExecutor 转 EventLoop 类型不匹配");
         return getResolver0((EventLoop) executor).asAddressResolver();
     }
 
@@ -29,5 +29,12 @@ public class AsnycDns extends AddressResolverGroup {
                 .ndots(1)
                 .build();
     }
+
+    private void assertTrue(boolean instance, String msg) {
+        if (!instance) {
+            throw new RuntimeException(msg);
+        }
+    }
+
 
 }
