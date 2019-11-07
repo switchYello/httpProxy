@@ -32,10 +32,10 @@ public class PromiseProvideForSS implements PromiseProvide {
                     @Override
                     protected void initChannel(Channel channel) {
                         ChannelPipeline p = channel.pipeline();
+                        p.addLast(ExceptionHandler.INSTANSE);
                         p.addLast(new SslHandler(CONTEXT.newEngine(channel.alloc())));
                         p.addLast(new EnSuccessHandler(promise, address));
                         p.addLast(new TransferHandler(ctx.channel()));
-                        p.addLast(ExceptionHandler.INSTANSE);
                     }
                 })
                 .connect()

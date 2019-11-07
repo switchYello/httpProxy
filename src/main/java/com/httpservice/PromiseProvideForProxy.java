@@ -24,8 +24,8 @@ public class PromiseProvideForProxy implements PromiseProvide {
                 .handler(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel ch) {
-                        ch.pipeline().addLast(new TransferHandler(ctx.channel()));
                         ch.pipeline().addLast(ExceptionHandler.INSTANSE);
+                        ch.pipeline().addLast(new TransferHandler(ctx.channel()));
                     }
                 })
                 .connect()
