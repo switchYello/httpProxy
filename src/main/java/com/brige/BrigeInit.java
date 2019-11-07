@@ -20,8 +20,6 @@ public class BrigeInit extends ChannelInitializer<Channel> {
         ChannelPipeline p = channel.pipeline();
         //连接超时
         p.addLast(new IdleStateHandler(30, 0, 0, TimeUnit.SECONDS));
-        //处理超时事件，和异常，尽量放在pipline的前面，但要放在idleStateHandler的后面
-        p.addLast("heartbeat", ExceptionHandler.INSTANSE);
         //http解码，解码出ip 端口，或者处理https
         p.addLast("httpcode", new HttpServerCodec());
         //聚合http请求
@@ -30,6 +28,8 @@ public class BrigeInit extends ChannelInitializer<Channel> {
         p.addLast(LoginHandler.INSTANCE);
         //真实处理类
         p.addLast("httpservice", httpService);
+        //处理超时事件，和异常
+        p.addLast("heartbeat", ExceptionHandler.INSTANSE);
 
     }
 }
