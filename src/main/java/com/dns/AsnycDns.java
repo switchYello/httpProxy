@@ -36,5 +36,4 @@ public class AsnycDns extends AddressResolverGroup {
         }
     }
 
-
 }

@@ -18,7 +18,7 @@ public class TransferHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        outChannel.write(msg);
+        outChannel.writeAndFlush(msg);
     }
 
     @Override

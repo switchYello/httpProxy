@@ -6,9 +6,10 @@ public class Main {
      * @param args 创建上下文并启动
      */
     public static void main(String[] args) {
-
-        Context context = new Context("param.properties");
+        Environment environment = new Environment("param.properties");
+        Context context = new Context(environment, 1);
         context.start();
+
 
     }
 

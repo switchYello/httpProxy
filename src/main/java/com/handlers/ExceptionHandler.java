@@ -9,8 +9,6 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.UnknownHostException;
-
 /**
  * 处理超时事件
  * 处理异常
@@ -18,7 +16,7 @@ import java.net.UnknownHostException;
 @ChannelHandler.Sharable
 public class ExceptionHandler extends ChannelInboundHandlerAdapter {
 
-    public static ExceptionHandler INSTANSE = new ExceptionHandler();
+    public static ExceptionHandler INSTANCE = new ExceptionHandler();
 
     private static Logger log = LoggerFactory.getLogger(ExceptionHandler.class);
 
@@ -38,9 +36,7 @@ public class ExceptionHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        if (cause instanceof UnknownHostException) {
-
-        } else if (cause instanceof ConnectTimeoutException) {
+        if (cause instanceof ConnectTimeoutException) {
 
         } else {
             log.debug("exceptionCaught", cause);
