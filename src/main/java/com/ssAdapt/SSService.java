@@ -22,7 +22,7 @@ public class SSService extends ChannelInboundHandlerAdapter {
             @Override
             public void operationComplete(ChannelFuture future) {
                 if (future.isSuccess()) {
-                    ctx.pipeline().addAfter("ssservice", "transfer", new TransferHandler(future.channel()));
+                    ctx.pipeline().replace(SSService.this, "transfer", new TransferHandler(future.channel()));
                     ctx.read();
                 } else {
                     ctx.close();
