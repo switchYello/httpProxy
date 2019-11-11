@@ -1,8 +1,6 @@
 package com.start;
 
 import com.utils.ResourceManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,20 +12,13 @@ import java.util.Properties;
  */
 public class Environment {
 
-    private static final Logger log = LoggerFactory.getLogger(Environment.class);
+    private static Integer localPort;
+    private static String remoteHost;
+    private static Integer remotePort;
 
-    private Integer localPort;
-    private String remoteHost;
-    private Integer remotePort;
-
-    public Environment(Properties properties) {
-        loadData(properties);
-        check();
-    }
-
-    public Environment(String fileName) {
-        try (InputStream resourceAsStream = ResourceManager.gerResourceForFile(fileName)) {
-            Objects.requireNonNull(resourceAsStream, "未发现配置文件:" + fileName);
+    static {
+        try (InputStream resourceAsStream = ResourceManager.gerResourceForFile("param.properties")) {
+            Objects.requireNonNull(resourceAsStream, "未发现配置文件: param.properties");
             Properties properties = new Properties();
             properties.load(resourceAsStream);
             loadData(properties);
@@ -37,50 +28,33 @@ public class Environment {
         }
     }
 
-    private void loadData(Properties properties) {
+    private static void loadData(Properties properties) {
         remoteHost = properties.getProperty("remoteHost");
-        String remotePort = properties.getProperty("remotePort");
-        if (remotePort != null) {
-            this.remotePort = Integer.valueOf(remotePort);
+        String remotePortProperties = properties.getProperty("remotePort");
+        if (remotePortProperties != null) {
+            remotePort = Integer.valueOf(remotePortProperties);
         }
-        String localPort = properties.getProperty("localPort");
-        if (localPort != null) {
-            this.localPort = Integer.valueOf(localPort);
+        String localPortProperties = properties.getProperty("localPort");
+        if (localPortProperties != null) {
+            localPort = Integer.valueOf(localPortProperties);
         }
     }
 
-    private void check() {
+    private static void check() {
         Objects.requireNonNull(localPort, "未知localPort");
         Objects.requireNonNull(remotePort, "未知remotePort");
         Objects.requireNonNull(remoteHost, "未知remoteHost");
     }
 
-
-    public Integer getLocalPort() {
+    public static Integer getLocalPort() {
         return localPort;
     }
 
-    public Environment setLocalPort(Integer localPort) {
-        this.localPort = localPort;
-        return this;
-    }
-
-    public String getRemoteHost() {
+    public static String getRemoteHost() {
         return remoteHost;
     }
 
-    public Environment setRemoteHost(String remoteHost) {
-        this.remoteHost = remoteHost;
-        return this;
-    }
-
-    public Integer getRemotePort() {
+    public static Integer getRemotePort() {
         return remotePort;
     }
-
-    public Environment setRemotePort(Integer remotePort) {
-        this.remotePort = remotePort;
-        return this;
-    }
-
 }
