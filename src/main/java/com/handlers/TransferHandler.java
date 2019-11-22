@@ -27,8 +27,6 @@ public class TransferHandler extends ChannelInboundHandlerAdapter {
                 public void operationComplete(ChannelFuture future) throws Exception {
                     if (future.isSuccess()) {
                         ctx.read();
-                    } else {
-                        outChannel.close();
                     }
                 }
             });
