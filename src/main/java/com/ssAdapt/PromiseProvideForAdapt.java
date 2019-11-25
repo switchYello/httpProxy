@@ -2,7 +2,7 @@ package com.ssAdapt;
 
 
 import com.dns.AsnycDns;
-import com.handlers.ExceptionHandler;
+import com.handlers.IdleStateHandlerImpl;
 import com.handlers.TransferHandler;
 import com.start.PromiseProvide;
 import io.netty.bootstrap.Bootstrap;
@@ -14,6 +14,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.net.InetSocketAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeUnit;
 
 public class PromiseProvideForAdapt implements PromiseProvide {
 
@@ -32,9 +33,9 @@ public class PromiseProvideForAdapt implements PromiseProvide {
                     @Override
                     protected void initChannel(Channel channel) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
                         ChannelPipeline p = channel.pipeline();
+                        p.addLast(new IdleStateHandlerImpl(30, 0, 0, TimeUnit.SECONDS));
                         p.addLast(new LoggingHandler("连接网站"));
                         p.addLast(new TransferHandler(ctx.channel()));
-                        p.addLast(ExceptionHandler.INSTANCE);
                     }
                 })
                 .connect();
