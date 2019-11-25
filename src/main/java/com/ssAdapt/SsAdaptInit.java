@@ -16,7 +16,7 @@ public class SsAdaptInit extends ChannelInitializer<Channel> {
     @Override
     protected void initChannel(Channel ch) {
         ChannelPipeline p = ch.pipeline();
-        p.addLast(new IdleStateHandlerImpl(30, 0, 0, TimeUnit.SECONDS));
+        p.addLast(new IdleStateHandlerImpl(30, 30, 0));
         p.addLast(new LoggingHandler("连接客户端"));
         p.addLast(SSService.INSTANCE);
     }

@@ -33,7 +33,7 @@ public class PromiseProvideForAdapt implements PromiseProvide {
                     @Override
                     protected void initChannel(Channel channel) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
                         ChannelPipeline p = channel.pipeline();
-                        p.addLast(new IdleStateHandlerImpl(30, 0, 0, TimeUnit.SECONDS));
+                        p.addLast(new IdleStateHandlerImpl(30, 30, 0));
                         p.addLast(new LoggingHandler("连接网站"));
                         p.addLast(new TransferHandler(ctx.channel()));
                     }
